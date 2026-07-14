@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Loops — Cartoon Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6E9;
+    --rule:#cfe3ea;
+    --margin:#e8a3a3;
+    --ink:#1b2a4a;
+    --green:#1e8a5f;
+    --green-soft:#dff2e9;
+    --purple:#6b4fa0;
+    --purple-soft:#eae3f5;
+    --orange:#d65c43;
+    --orange-soft:#fbe6e0;
+    --yellow:#f3c94a;
+    --paper-shadow: rgba(27,42,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(var(--paper), var(--paper) 31px, var(--rule) 32px),
+      var(--paper);
+    background-attachment:local;
+    font-family:'Kalam', cursive;
+    color:var(--ink);
+    padding:18px 18px 40px;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    top:0; left:46px; bottom:0; width:2px;
+    background:var(--margin);
+    opacity:.55;
+    pointer-events:none;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding-left:14px;}
+
+  header{text-align:center;margin-bottom:18px;}
+  h1{
+    font-size:clamp(28px,6vw,44px);
+    letter-spacing:1px;
+    margin:6px 0 4px;
+    text-transform:uppercase;
+    text-shadow:2px 2px 0 var(--yellow);
+  }
+  header p{margin:0;font-size:16px;opacity:.75;}
+  .underline{
+    width:min(360px,70%);
+    height:8px;
+    margin:6px auto 14px;
+    background:var(--purple);
+    border-radius:40% 60% 55% 45%/50% 40% 60% 50%;
+    opacity:.6;
+  }
+
+  /* tabs */
+  .tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+  .tab{
+    font-family:'Kalam',cursive;
+    font-weight:700;
+    font-size:16px;
+    padding:9px 18px;
+    border:3px solid var(--ink);
+    background:#fff;
+    border-radius:255px 15px 225px 15px/15px 225px 15px 255px;
+    cursor:pointer;
+    transform:rotate(-1deg);
+    transition:transform .15s ease, background .15s ease, color .15s ease;
+  }
+  .tab:nth-child(2){transform:rotate(0.8deg);}
+  .tab:nth-child(3){transform:rotate(-0.6deg);}
+  .tab:hover{transform:rotate(0deg) scale(1.04);}
+  .tab.active{color:#fff;}
+  .tab[data-key="for"].active{background:var(--green);border-color:var(--green);}
+  .tab[data-key="while"].active{background:var(--purple);border-color:var(--purple);}
+  .tab[data-key="nested"].active{background:var(--orange);border-color:var(--orange);}
+
+  .eyebrow{
+    text-align:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    letter-spacing:.5px;
+    padding:4px 12px;
+    display:inline-block;
+    border-radius:6px;
+    margin:0 auto 16px;
+    background:#fff;
+  }
+  .eyebrow-row{text-align:center;}
+
+  /* stage layout */
+  .stage-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:18px;
+    align-items:stretch;
+  }
+  @media (max-width:760px){
+    .stage-grid{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:#fff;
+    border:3px solid var(--ink);
+    border-radius:22px 8px 22px 8px/8px 22px 8px 22px;
+    padding:16px;
+    position:relative;
+    box-shadow:6px 6px 0 var(--paper-shadow);
+  }
+  .panel.rot-l{transform:rotate(-0.4deg);}
+  .panel.rot-r{transform:rotate(0.5deg);}
+
+  .panel h3{margin:0 0 10px;font-size:19px;display:flex;align-items:center;gap:8px;}
+  .dot-legend{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  /* cartoon stage */
+  .cartoon-stage{
+    min-height:260px;
+    border:2px dashed #c9c2ad;
+    border-radius:16px;
+    background:#fffdf7;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+  }
+
+  .bubble{
+    position:absolute;
+    top:8px; left:8px;
+    background:#fff;
+    border:2.5px solid var(--ink);
+    border-radius:14px;
+    padding:6px 12px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    font-weight:600;
+    max-width:78%;
+    z-index:5;
+  }
+  .bubble::after{
+    content:"";
+    position:absolute;
+    bottom:-10px;left:16px;
+    border-width:10px 8px 0 0;
+    border-style:solid;
+    border-color:var(--ink) transparent transparent transparent;
+  }
+  .bubble::before{
+    content:"";
+    position:absolute;
+    bottom:-6.5px;left:18px;
+    border-width:8px 6px 0 0;
+    border-style:solid;
+    border-color:#fff transparent transparent transparent;
+    z-index:1;
+  }
+
+  /* progress dots */
+  .dots{display:flex;gap:8px;justify-content:center;margin-top:10px;}
+  .idot{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid var(--ink);
+    background:#fff;
+    transition:background .25s ease, transform .25s ease;
+  }
+  .idot.on{transform:scale(1.15);}
+
+  /* --- tea scenario --- */
+  .tea-scene{position:relative;width:260px;height:220px;}
+  .stove{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:150px;height:22px;background:var(--ink);border-radius:6px;}
+  .pot{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:110px;height:70px;background:#8b95a1;border-radius:10px 10px 26px 26px;border:3px solid var(--ink);}
+  .pot::before{content:"";position:absolute;top:-10px;left:-14px;width:14px;height:20px;background:#8b95a1;border:3px solid var(--ink);border-radius:6px;}
+  .pot::after{content:"";position:absolute;top:-10px;right:-14px;width:14px;height:20px;background:#8b95a1;border:3px solid var(--ink);border-radius:6px;}
+  .pot.brewed{background:#a9743b;transition:background .5s ease;}
+  .steam{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
+  .steam span{
+    width:6px;height:22px;background:#c9d3da;border-radius:6px;opacity:0;
+    animation:steamFloat 1.8s ease-in-out infinite;
+  }
+  .steam span:nth-child(2){animation-delay:.3s;}
+  .steam span:nth-child(3){animation-delay:.6s;}
+  @keyframes steamFloat{
+    0%{opacity:0;transform:translateY(0) scaleY(1);}
+    30%{opacity:.8;}
+    100%{opacity:0;transform:translateY(-26px) scaleY(1.3);}
+  }
+  .jar{position:absolute;bottom:20px;left:10px;width:44px;height:54px;background:#fff;border:3px solid var(--ink);border-radius:6px 6px 12px 12px;}
+  .jar::before{content:"SUGAR";position:absolute;top:20px;left:2px;right:2px;font-size:7px;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ink);}
+  .spoon{
+    position:absolute;bottom:46px;left:34px;font-size:22px;opacity:0;
+    transition:all .55s ease;
+  }
+  .spoon.fly{opacity:1;left:110px;bottom:95px;transform:rotate(30deg);}
+  .tally{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
+  .tally span{width:20px;height:20px;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px;background:#fff;}
+  .tally span.filled{background:var(--green);color:#fff;}
+
+  /* --- water scenario --- */
+  .water-scene{position:relative;width:220px;height:230px;}
+  .faucet{position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:16px;background:#9aa7b0;border:3px solid var(--ink);border-radius:4px;}
+  .faucet::after{content:"";position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);width:8px;height:16px;background:#9aa7b0;border:3px solid var(--ink);border-top:none;}
+  .drip{position:absolute;top:30px;left:50%;transform:translateX(-50%);font-size:16px;opacity:0;}
+  .drip.show{animation:dripFall .5s ease;}
+  @keyframes dripFall{0%{opacity:1;top:30px;}100%{opacity:0;top:70px;}}
+  .bottle-outer{
+    position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+    width:90px;height:150px;border:4px solid var(--ink);
+    border-radius:10px 10px 28px 28px;
+    background:#eef4f6;
+    overflow:hidden;
+  }
+  .bottle-outer::before{
+    content:"";position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+    width:26px;height:16px;border:4px solid var(--ink);border-bottom:none;background:#eef4f6;
+    border-radius:4px 4px 0 0;
+  }
+  .bottle-fill{
+    position:absolute;bottom:0;left:0;right:0;height:0%;
+    background:linear-gradient(#7ec3e6,#4d9fd1);
+    transition:height .6s ease;
+  }
+  .bottle-fill::before{
+    content:"";position:absolute;top:-6px;left:0;right:0;height:10px;
+    background:inherit;
+    border-radius:50%;
+    opacity:.6;
+  }
+  .level-label{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.7);padding:1px 6px;border-radius:6px;z-index:2;}
+  .full-badge{
+    position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) scale(0);
+    font-size:14px;font-weight:700;background:var(--purple);color:#fff;
+    padding:6px 10px;border-radius:10px;transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+    z-index:3;
+  }
+  .full-badge.show{transform:translate(-50%,-50%) scale(1);}
+
+  /* --- nested scenario --- */
+  .nested-scene{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .grid-wrap{display:flex;align-items:flex-start;gap:8px;}
+  .row-labels{display:flex;flex-direction:column;gap:6px;padding-top:2px;}
+  .row-labels span, .col-labels span{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green);font-weight:700;
+    height:52px;display:flex;align-items:center;
+  }
+  .col-labels{display:flex;gap:6px;justify-content:center;margin-bottom:4px;}
+  .col-labels span{height:auto;color:var(--purple);}
+  .grid3{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:6px;}
+  .cell{
+    border:2.5px solid #c9c2ad;border-radius:8px;background:#fffdf7;
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    transition:background .2s ease, border-color .2s ease;
+  }
+  .cell.row-active{background:var(--green-soft);}
+  .cell.col-active{border-color:var(--purple);}
+  .cell.star span{display:inline-block;animation:pop .35s ease;}
+  @keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+  /* code + console panel */
+  .code-editor{
+    background:#1b2230;color:#e8e8e8;border-radius:12px;
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.9;
+    padding:12px 14px;overflow-x:auto;
+  }
+  .code-editor .cline{padding:1px 8px;border-radius:6px;white-space:pre;}
+  .code-editor .cline.active{background:var(--yellow);color:#1b2230;font-weight:700;}
+  .kw{color:#f3a24c;}
+  .code-editor .cline.active .kw{color:#8a4b00;}
+  .str{color:#8fd6a8;}
+  .code-editor .cline.active .str{color:#0d5c33;}
+
+  .console{
+    margin-top:12px;background:#0e1420;color:#8fe37c;border-radius:12px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    padding:10px 12px;height:130px;overflow-y:auto;
+  }
+  .console::before{content:">_ output";display:block;color:#5f7a8f;font-size:11px;margin-bottom:6px;}
+  .console .line{opacity:0;animation:fadeUp .3s ease forwards;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  /* controls */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;
+    margin-top:18px;
+  }
+  button.ctrl{
+    font-family:'Kalam',cursive;font-weight:700;font-size:15px;
+    border:3px solid var(--ink);background:#fff;border-radius:14px;
+    padding:8px 16px;cursor:pointer;transition:transform .12s ease;
+  }
+  button.ctrl:hover{transform:translateY(-2px);}
+  button.ctrl:active{transform:translateY(1px);}
+  #playBtn{background:var(--ink);color:#fff;}
+  .speed-wrap{display:flex;align-items:center;gap:6px;font-size:14px;}
+  input[type=range]{accent-color:var(--purple);}
+
+  .keypoints{
+    margin-top:20px;background:#fff;border:3px solid var(--purple);
+    border-radius:20px 8px 20px 8px/8px 20px 8px 20px;
+    padding:14px 18px;
+  }
+  .keypoints h4{margin:0 0 8px;color:var(--purple);}
+  .keypoints ul{margin:0;padding-left:20px;}
+  .keypoints li{margin-bottom:4px;}
+  footer{text-align:center;margin-top:22px;font-size:13px;opacity:.55;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Python Loops</h1>
+    <div class="underline"></div>
+    <p>a cartoon lab — watch the code run, one step at a time</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-key="for">🫖 FOR LOOP</button>
+    <button class="tab" data-key="while">🚰 WHILE LOOP</button>
+    <button class="tab" data-key="nested">⭐ NESTED LOOP</button>
+  </div>
+  <div class="eyebrow-row"><span class="eyebrow" id="eyebrow"></span></div>
+
+  <div class="stage-grid">
+    <div class="panel rot-l">
+      <h3><span class="dot-legend" id="legendDot" style="background:var(--green)"></span> <span id="sceneTitle">Making Tea</span></h3>
+      <div class="cartoon-stage" id="cartoonStage"></div>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="panel rot-r">
+      <h3><span class="dot-legend" style="background:var(--ink)"></span> code + output</h3>
+      <div class="code-editor" id="codeEditor"></div>
+      <div class="console" id="console"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl" id="stepBtn">⏭ Step</button>
+    <button class="ctrl" id="playBtn">▶ Play</button>
+    <button class="ctrl" id="resetBtn">↺ Reset</button>
+    <div class="speed-wrap">
+      🐢<input type="range" id="speed" min="1" max="5" value="3">🐇
+    </div>
+  </div>
+
+  <div class="keypoints" id="keypoints"></div>
+
+  <footer>build with 🖍️ for learning Python loops · tap Step to go slowly, or Play to watch it run</footer>
+</div>
+
+<script>
+/* ---------- console + shared UI helpers ---------- */
+const consoleEl = document.getElementById('console');
+let openLine = null;
+
+function pushLine(text){
+  const d = document.createElement('div');
+  d.className = 'line';
+  d.textContent = text;
+  consoleEl.appendChild(d);
+  openLine = null;
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+function pushInline(text){
+  if(!openLine){
+    openLine = document.createElement('div');
+    openLine.className = 'line';
+    openLine.textContent = '';
+    consoleEl.appendChild(openLine);
+  }
+  openLine.textContent += text + ' ';
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+function newline(){ openLine = null; }
+function clearConsole(){ consoleEl.innerHTML=''; openLine=null; }
+
+const bubbleTextDefault = 'Press ▶ Play or ⏭ Step to begin';
+
+/* ---------- scenario: TEA (for loop) ---------- */
+const teaSteps = [
+  {line:0, bubble:'i = 0  →  0 &lt; 3 ✓ enter loop'},
+  {line:1, output:'Add 1 spoon of sugar', action:()=>teaAddSpoon(1), dot:true},
+  {line:0, bubble:'i = 1  →  1 &lt; 3 ✓ enter loop'},
+  {line:1, output:'Add 1 spoon of sugar', action:()=>teaAddSpoon(2), dot:true},
+  {line:0, bubble:'i = 2  →  2 &lt; 3 ✓ enter loop'},
+  {line:1, output:'Add 1 spoon of sugar', action:()=>teaAddSpoon(3), dot:true},
+  {line:0, bubble:'i = 3  →  3 &lt; 3 ✗  exit loop', action:()=>teaBrew()},
+  {bubble:'✅ Loop finished — nothing left in range(3)', output:'☕ Tea is ready!', final:true},
+];
+
+function teaStageHTML(){
+  return `
+  <div class="tea-scene">
+    <div class="bubble" id="bubble">${bubbleTextDefault}</div>
+    <div class="steam"><span></span><span></span><span></span></div>
+    <div class="jar"></div>
+    <div class="spoon" id="spoon">🥄</div>
+    <div class="pot" id="pot"></div>
+    <div class="stove"></div>
+    <div class="tally" id="tally">
+      <span data-n="1">1</span><span data-n="2">2</span><span data-n="3">3</span>
+    </div>
+  </div>`;
+}
+function teaAddSpoon(n){
+  const spoon = document.getElementById('spoon');
+  spoon.classList.remove('fly'); void spoon.offsetWidth;
+  spoon.classList.add('fly');
+  const t = document.querySelector(`#tally span[data-n="${n}"]`);
+  if(t) setTimeout(()=>t.classList.add('filled'), 300);
+}
+function teaBrew(){
+  const pot = document.getElementById('pot');
+  if(pot) pot.classList.add('brewed');
+}
+
+/* ---------- scenario: WATER (while loop) ---------- */
+const waterSteps = [];
+waterSteps.push({line:0, bubble:'bottle_full = False, level = 0'});
+[20,40,60,80,100].forEach((lvl)=>{
+  waterSteps.push({line:1, bubble:'not bottle_full → True, keep going'});
+  waterSteps.push({line:2, output:'Filling...'});
+  waterSteps.push({line:3, bubble:`level += 20  →  level = ${lvl}`, action:()=>waterFill(lvl), dot:true});
+  waterSteps.push({line:4, bubble:`level >= 100 ?  ${lvl>=100 ? 'Yes' : 'No'}`});
+  if(lvl===100){
+    waterSteps.push({line:5, bubble:'bottle_full = True', action:()=>waterFullBadge()});
+  }
+});
+waterSteps.push({line:1, bubble:'not bottle_full → False, exit loop'});
+waterSteps.push({output:'🚰 Bottle full — stop filling!', final:true});
+
+function waterStageHTML(){
+  return `
+  <div class="water-scene">
+    <div class="bubble" id="bubble">${bubbleTextDefault}</div>
+    <div class="faucet"></div>
+    <div class="drip" id="drip">💧</div>
+    <div class="bottle-outer">
+      <div class="bottle-fill" id="fill"></div>
+      <div class="level-label" id="levelLabel">0%</div>
+      <div class="full-badge" id="fullBadge">FULL!</div>
+    </div>
+  </div>`;
+}
+function waterFill(lvl){
+  const fill = document.getElementById('fill');
+  const label = document.getElementById('levelLabel');
+  const drip = document.getElementById('drip');
+  if(fill) fill.style.height = lvl + '%';
+  if(label) label.textContent = lvl + '%';
+  if(drip){ drip.classList.remove('show'); void drip.offsetWidth; drip.classList.add('show'); }
+}
+function waterFullBadge(){
+  const b = document.getElementById('fullBadge');
+  if(b) b.classList.add('show');
+}
+
+/* ---------- scenario: NESTED (stars) ---------- */
+const nestedSteps = [];
+for(let i=0;i<3;i++){
+  nestedSteps.push({line:0, bubble:`i = ${i}  (outer loop → row ${i})`, action:()=>nestedRow(i)});
+  for(let j=0;j<3;j++){
+    nestedSteps.push({line:1, bubble:`j = ${j}  (inner loop → column ${j})`, action:()=>nestedCol(j)});
+    nestedSteps.push({line:2, action:()=>nestedStar(i,j), output_inline:'*'});
+  }
+  nestedSteps.push({line:3, action:()=>newline(), dot:true, bubble:`row ${i} done → print() moves to next line`});
+}
+nestedSteps.push({bubble:'✅ 3×3 grid complete!', final:true});
+
+function nestedStageHTML(){
+  return `
+  <div class="nested-scene">
+    <div class="bubble" id="bubble">${bubbleTextDefault}</div>
+    <div class="col-labels"><span>j=0</span><span>j=1</span><span>j=2</span></div>
+    <div class="grid-wrap">
+      <div class="row-labels"><span>i=0</span><span>i=1</span><span>i=2</span></div>
+      <div class="grid3" id="grid3"></div>
+    </div>
+  </div>`;
+}
+function buildGrid(){
+  const g = document.getElementById('grid3');
+  if(!g) return;
+  g.innerHTML='';
+  for(let r=0;r<3;r++){
+    for(let c=0;c<3;c++){
+      const cell = document.createElement('div');
+      cell.className='cell';
+      cell.dataset.row=r; cell.dataset.col=c;
+      g.appendChild(cell);
+    }
+  }
+}
+function nestedRow(i){
+  document.querySelectorAll('.cell').forEach(c=>{
+    c.classList.toggle('row-active', +c.dataset.row === i);
+  });
+}
+function nestedCol(j){
+  document.querySelectorAll('.cell').forEach(c=>{
+    c.classList.toggle('col-active', +c.dataset.col === j);
+  });
+}
+function nestedStar(i,j){
+  const cell = document.querySelector(`.cell[data-row="${i}"][data-col="${j}"]`);
+  if(cell){ cell.classList.add('star'); cell.innerHTML='<span>⭐</span>'; }
+}
+
+/* ---------- scenario registry ---------- */
+const scenarios = {
+  for:{
+    label:'Making Tea', eyebrow:'FOR LOOP · used when you know exactly how many times to repeat',
+    legendColor:'var(--green)',
+    code:[
+      '<span class="kw">for</span> i <span class="kw">in</span> range(3):',
+      '    print(<span class="str">"Add 1 spoon of sugar"</span>)'
+    ],
+    steps: teaSteps, totalDots:3,
+    stageHTML: teaStageHTML, buildExtra: ()=>{}
+  },
+  while:{
+    label:'Filling a Water Bottle', eyebrow:"WHILE LOOP · used when you don't know how many times — only a condition",
+    legendColor:'var(--purple)',
+    code:[
+      'bottle_full = <span class="kw">False</span>',
+      '<span class="kw">while</span> <span class="kw">not</span> bottle_full:',
+      '    print(<span class="str">"Filling..."</span>)',
+      '    level += 20',
+      '    <span class="kw">if</span> level &gt;= 100:',
+      '        bottle_full = <span class="kw">True</span>'
+    ],
+    steps: waterSteps, totalDots:5,
+    stageHTML: waterStageHTML, buildExtra: ()=>{}
+  },
+  nested:{
+    label:'Printing a 3×3 Grid', eyebrow:'NESTED LOOP · a loop inside a loop — outer picks the row, inner picks the column',
+    legendColor:'var(--orange)',
+    code:[
+      '<span class="kw">for</span> i <span class="kw">in</span> range(3):',
+      '    <span class="kw">for</span> j <span class="kw">in</span> range(3):',
+      '        print(<span class="str">"*"</span>, end=<span class="str">&#39; &#39;</span>)',
+      '    print()'
+    ],
+    steps: nestedSteps, totalDots:3,
+    stageHTML: nestedStageHTML, buildExtra: buildGrid
+  }
+};
+
+/* ---------- key points per scenario ---------- */
+const keypointsHTML = {
+  for: `<h4>Key points — for loop</h4><ul>
+      <li><b>for</b> is used when you know how many times to repeat.</li>
+      <li><code>range(3)</code> gives 0, 1, 2 — three trips through the loop.</li>
+      <li>The loop ends automatically once the sequence runs out.</li></ul>`,
+  while: `<h4>Key points — while loop</h4><ul>
+      <li><b>while</b> is used when the number of repeats isn't known ahead of time.</li>
+      <li>It keeps going as long as the condition is <b>True</b>.</li>
+      <li>Forget to update the condition and you get an infinite loop! 😅</li></ul>`,
+  nested: `<h4>Key points — nested loop</h4><ul>
+      <li>A loop inside another loop: the <b>outer</b> loop controls rows, the <b>inner</b> loop controls columns.</li>
+      <li>For every single step of the outer loop, the inner loop runs completely.</li>
+      <li><code>print()</code> with no arguments just moves to a new line.</li></ul>`
+};
+
+/* ---------- controller ---------- */
+let currentKey='for';
+let stepIdx=-1;
+let dotIdx=0;
+let playing=false;
+let timer=null;
+
+function renderCode(scn){
+  const editor = document.getElementById('codeEditor');
+  editor.innerHTML = scn.code.map((l,i)=>`<div class="cline" data-i="${i}">${l}</div>`).join('');
+}
+function highlightLine(n){
+  document.querySelectorAll('.cline').forEach(el=>{
+    el.classList.toggle('active', el.dataset.i == n);
+  });
+}
+function clearHighlight(){
+  document.querySelectorAll('.cline').forEach(el=>el.classList.remove('active'));
+}
+function renderDots(total){
+  const wrap = document.getElementById('dots');
+  wrap.innerHTML='';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className='idot';
+    wrap.appendChild(d);
+  }
+}
+function fillDot(n){
+  const dots = document.querySelectorAll('.idot');
+  if(dots[n-1]) dots[n-1].classList.add('on');
+}
+function updateBubble(text){
+  const b = document.getElementById('bubble');
+  if(b) b.innerHTML = text;
+}
+
+function loadScenario(key){
+  pausePlaying();
+  currentKey = key;
+  stepIdx = -1;
+  dotIdx = 0;
+  const scn = scenarios[key];
+
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.key===key));
+  document.getElementById('eyebrow').textContent = scn.eyebrow;
+  document.getElementById('sceneTitle').textContent = scn.label;
+  document.getElementById('legendDot').style.background = scn.legendColor;
+  document.getElementById('keypoints').innerHTML = keypointsHTML[key];
+
+  renderCode(scn);
+  clearHighlight();
+  clearConsole();
+  renderDots(scn.totalDots);
+
+  document.getElementById('cartoonStage').innerHTML = scn.stageHTML();
+  scn.buildExtra();
+}
+
+function stepForward(){
+  const scn = scenarios[currentKey];
+  if(stepIdx+1 >= scn.steps.length){
+    pausePlaying();
+    return;
+  }
+  stepIdx++;
+  const s = scn.steps[stepIdx];
+
+  if(s.line !== undefined) highlightLine(s.line); else clearHighlight();
+  if(s.action) s.action();
+  if(s.output) pushLine(s.output);
+  if(s.output_inline) pushInline(s.output_inline);
+  if(s.bubble) updateBubble(s.bubble);
+  if(s.dot){ dotIdx++; fillDot(dotIdx); }
+  if(s.final){ pausePlaying(); }
+}
+
+function pausePlaying(){
+  playing=false;
+  clearInterval(timer);
+  document.getElementById('playBtn').textContent='▶ Play';
+}
+function startPlaying(){
+  const scn = scenarios[currentKey];
+  if(stepIdx+1 >= scn.steps.length){ loadScenario(currentKey); }
+  playing=true;
+  document.getElementById('playBtn').textContent='⏸ Pause';
+  const speed = document.getElementById('speed').value;
+  const delay = 1500 - speed*230;
+  timer = setInterval(()=>{
+    stepForward();
+    if(!playing) clearInterval(timer);
+  }, delay);
+}
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=> loadScenario(t.dataset.key));
+});
+document.getElementById('stepBtn').addEventListener('click', ()=>{
+  pausePlaying();
+  stepForward();
+});
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  if(playing) pausePlaying(); else startPlaying();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=> loadScenario(currentKey));
+document.getElementById('speed').addEventListener('input', ()=>{
+  if(playing){ clearInterval(timer); startPlaying(); }
+});
+
+/* ---------- boot ---------- */
+loadScenario('for');
+</script>
+</body>
+</html>
